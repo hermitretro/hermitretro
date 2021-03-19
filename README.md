@@ -23,15 +23,15 @@ also has BOM information embedded within it.
 
 # Links
 
-[Hermit Retro Products -- WWW](https://hermitretro.com)
-[Hermit Retro Products -- Facebook](https://www.facebook.com/hermitretro)
-[Hermit Retro Products -- Twitter](https://www.twitter.com/hermitretro)
-[Hermit Retro Products -- Store at ZX Renew](https://zxrenew.co.uk/Hermit-Retro-ZX-Spectrum-Board-c72555098)
+* [Hermit Retro Products -- WWW](https://hermitretro.com)
+* [Hermit Retro Products -- Facebook](https://www.facebook.com/hermitretro)
+* [Hermit Retro Products -- Twitter](https://www.twitter.com/hermitretro)
+* [Hermit Retro Products -- Store at ZX Renew](https://zxrenew.co.uk/Hermit-Retro-ZX-Spectrum-Board-c72555098)
 
 # Other Repositories
 
-Our changes to the Fuse Spectrum Emulator are in the [fuse-hermitretro](https://github.com/hermitretro/fuse-hermitretro) repository.
+* Our changes to the Fuse Spectrum Emulator are in the [fuse-hermitretro](https://github.com/hermitretro/fuse-hermitretro) repository.
 
-We have published the full source code and notes to the "second SD card on a Raspberry Pi Zero"
+* We have published the full source code and notes to the "second SD card on a Raspberry Pi Zero"
 problem. This can be found in our [spi-fat-fuse](https://github.com/hermitretro/spi-fat-fuse)
 repository.
