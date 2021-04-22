@@ -28,7 +28,7 @@
 #include "bcm2835.h"
 #include "pins.h"
 
-#define ZXZERODIAG_VERSION "1.0.1"
+#define ZXZERODIAG_VERSION "1.0.2"
 
 #define DEBOUNCE_INTERVAL 250L
 unsigned long long lastEventTime = 0;
@@ -278,6 +278,7 @@ int main( int argc, char **argv ) {
             mvaddstr( y++, 2, "5. Test GPIO" );
             mvaddstr( y++, 2, "6. Test USB" );
             mvaddstr( y++, 2, "7. Test I2C" );
+            mvaddstr( y++, 2, "8. Delete Fuse config file" );
 
             mvaddch( menuIndex + starty, 0, '>' );
 
@@ -305,7 +306,7 @@ int main( int argc, char **argv ) {
 
             /** Advance the cursor */
             menuIndex++;
-            menuIndex %= 8;
+            menuIndex %= 9;
 
             needsRefresh = 1;
         } else {
@@ -407,6 +408,21 @@ int main( int argc, char **argv ) {
                         move( 0, 0 );
                         mvaddstr( 0, 0, ">>> Test I2C" );
                         execCommand( "/usr/sbin/i2cdetect -y 1 2>&1" );
+                        mvaddstr( maxlines - 4, 0, "Press a key to continue" );
+                        blockWait();
+                        break;
+                    }
+                    case 8: {
+                        mvaddstr( maxlines - 5, 0, ">>> Delete Fuse config file" );
+                        mvaddstr( maxlines - 4, 0, "Press a key to continue" );
+                        refresh();
+                        blockWait();
+                        clear();
+                        move( 0, 0 );
+                        mvaddstr( 0, 0, ">>> Delete Fuse config file" );
+                        execCommand( "/bin/rm -f /.fuserc" );
+                        execCommand( "/bin/sync" );
+                        execCommand( "/bin/ls /.fuserc" );
                         mvaddstr( maxlines - 4, 0, "Press a key to continue" );
                         blockWait();
                         break;
