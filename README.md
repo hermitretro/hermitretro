@@ -19,7 +19,7 @@ also has BOM information embedded within it.
 
 # Products
 
-* [Hermit Retro ZXZero Board -- a Raspberry Pi Zero-powered PCB for ZX Spectrum and ZX Spectrum+ cases](src/zxzero)
+* [Hermit Retro ZXZero Board -- a Raspberry Pi Zero W-powered PCB for ZX Spectrum and ZX Spectrum+ cases](src/zxzero)
 
 # Links
 

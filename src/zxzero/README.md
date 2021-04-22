@@ -15,7 +15,7 @@ The Hermit Retro ZXZero Board is primarily designed for quick and easy playing o
 
 The Hermit Retro ZXZero Board features:
 
-* Raspberry Pi Zero (or Zero W)
+* Raspberry Pi Zero W
 * Full-size HDMI output
 * DB9 Joystick connector supporting any Atari-pinout joysticks
 * External MicroSD card socket (for storing "educational programs")
@@ -53,14 +53,11 @@ The high-level goals for this project are as follows:
 
 # Current Status
 
-The Hermit Retro ZXZero is V1.7.0. This is a *mostly tested* build. 
-Proceed at your own risk.
+The Hermit Retro ZXZero is V1.8.0
 
 # Purchasing
 
 Hermit Retro products are available from [ZX Renew](https://zxrenew.co.uk/Hermit-Retro-ZX-Spectrum-Board-c72555098)
-
-
 
 # Licensing
 
