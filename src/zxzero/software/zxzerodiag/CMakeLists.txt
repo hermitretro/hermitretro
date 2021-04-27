@@ -28,6 +28,10 @@ list(APPEND ZXZERODIAG_SOURCES
 "${CMAKE_CURRENT_LIST_DIR}/src/zxzerodiag.c"
 "${CMAKE_CURRENT_LIST_DIR}/src/bcm2835.c"
 "${CMAKE_CURRENT_LIST_DIR}/src/bcm2835.h"
+"${CMAKE_CURRENT_LIST_DIR}/src/gpio_membrane.c"
+"${CMAKE_CURRENT_LIST_DIR}/src/gpio_membrane.h"
+"${CMAKE_CURRENT_LIST_DIR}/src/keymap.h"
+"${CMAKE_CURRENT_LIST_DIR}/src/pins.h"
 )
 
 add_executable(zxzerodiag ${ZXZERODIAG_SOURCES})
