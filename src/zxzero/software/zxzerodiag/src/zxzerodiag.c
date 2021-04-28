@@ -30,7 +30,7 @@
 #include "gpio_membrane.h"
 #include "pins.h"
 
-#define ZXZERODIAG_VERSION "1.1.0"
+#define ZXZERODIAG_VERSION "1.1.1"
 
 #define DEBOUNCE_INTERVAL 250L
 unsigned long long lastEventTime = 0;
@@ -60,8 +60,8 @@ if ( useGPIO == 1 ) { \
 
 /** WiFi parameters */
 char country[3] = { 'G', 'B', '\0' };
-char ssid[17] = { 0 };
-char psk[17] = { 0 };
+char ssid[33] = { 0 };
+char psk[33] = { 0 };
 
 /** Compute the time between the event and now */
 int secondsToWait( unsigned long long lastTime, unsigned long long waitTime ) {
@@ -250,8 +250,10 @@ int writeWPASupplicantConf() {
  */
 void configureWiFi() {
 
+#define XSTART 16
+
     int currenty = 2;
-    int currentx = 16;
+    int currentx = XSTART;
 
     country[0] = 'G';
     country[1] = 'B';
@@ -272,22 +274,22 @@ void configureWiFi() {
         move( 0, 0 );
         mvaddstr( 0, 0, ">>> Configure WiFi" );
         mvaddstr( 2, 0, "Country Code:  [" );
-        mvaddstr( 2, 16, country );
-        for ( int i = 0 ; i < 2 - strlen( country ) ; i++ ) {
+        mvaddstr( 2, XSTART, country );
+        for ( int i = 0 ; i < sizeof( country ) - strlen( country ) - 1 ; i++ ) {
             addch( '-' );
         }
         addstr( "] (see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)" );
 
         mvaddstr( 3, 0, "SSID:          [" );
-        mvaddstr( 3, 16, ssid );
-        for ( int i = 0 ; i < 16 - strlen( ssid ) ; i++ ) {
+        mvaddstr( 3, XSTART, ssid );
+        for ( int i = 0 ; i < sizeof( ssid ) - strlen( ssid ) - 1 ; i++ ) {
             addch( '-' );
         }
         addch( ']' );
 
         mvaddstr( 4, 0, "PSK:           [" );
-        mvaddstr( 4, 16, psk );
-        for ( int i = 0 ; i < 16 - strlen( psk ) ; i++ ) {
+        mvaddstr( 4, XSTART, psk );
+        for ( int i = 0 ; i < sizeof( psk ) - strlen( psk ) - 1 ; i++ ) {
             addch( '-' );
         }
         addch( ']' );
@@ -296,7 +298,7 @@ void configureWiFi() {
         mvaddstr( 7, 0, "               [Cancel]" );
 
         if ( useGPIO ) {
-            mvaddstr( maxlines - 5, 0, "SYMBOL SHIFT to move between fields" );
+            mvaddstr( maxlines - 5, 0, "Shift+6 to move between fields" );
         } else {
             mvaddstr( maxlines - 5, 0, "TAB to move between fields" );
         }
@@ -307,6 +309,7 @@ void configureWiFi() {
         refresh();
 
         int ch = -1;
+keyjmp:
         if ( useGPIO ) {
             ch = gpio_membrane_poll();
             while ( ch == -1 ) {
@@ -315,48 +318,56 @@ void configureWiFi() {
         } else {
             ch = getch();
         }
+        if ( ch == -1 ) {
+            /** Shouldn't be here... */
+            goto keyjmp;
+        }
         if ( ch == '\t' ) {
             switch ( currenty ) {
                 case 2: {
-                    currentx = 16 + strlen( ssid );
+                    currentx = XSTART + strlen( ssid );
                     break;
                 }
                 case 3: {
-                    ssid[currentx - 16] = '\0';
-                    currentx = 16 + strlen( psk );
+                    ssid[currentx - XSTART] = '\0';
+                    currentx = XSTART + strlen( psk );
                     break;
                 }
                 case 4: {
-                    psk[currentx - 16] = '\0';
-                    currentx = 16;
+                    psk[currentx - XSTART] = '\0';
+                    currentx = XSTART + strlen( psk );
                     break;
                 }
             }
+            if ( currentx == XSTART - 1 ) {
+                currentx++;
+            }
+
             currenty++;
             if ( currenty == 5 ) {
                 currenty++;
             } else {
                 if ( currenty == 8 ) {
                     currenty = 2;
-                    currentx = 16 + strlen( country );
+                    currentx = XSTART + strlen( country );
                 }
             }
         } else {
             if ( ch == 0x7f ) {
-                if ( currentx > 16 ) {
+                if ( currentx > XSTART ) {
                     currentx--;
                 }
                 switch ( currenty ) {
                     case 2: {
-                        country[currentx - 16] = '\0';
+                        country[currentx - XSTART] = '\0';
                         break;
                     }
                     case 3: {
-                        ssid[currentx - 16] = '\0';
+                        ssid[currentx - XSTART] = '\0';
                         break;
                     }
                     case 4: {
-                        psk[currentx - 16] = '\0';
+                        psk[currentx - XSTART] = '\0';
                         break;
                     }
                 }
@@ -392,27 +403,37 @@ void configureWiFi() {
                     }
                 } else {
                     switch ( currenty ) {
+                        int maxx;
                         case 2: {
-                            country[currentx - 16] = ch;
-                            currentx++;
-                            if ( currentx > 17 ) {
-                                currentx = 17;
+                            maxx = (XSTART + sizeof( country ) - 1);
+                            if ( currentx < maxx ) {
+                                country[currentx - XSTART] = ch;
+                                currentx++;
+                            }
+                            if ( currentx > (maxx - 1) ) {
+                                currentx = maxx;
                             }
                             break;
                         }
                         case 3: {
-                            ssid[currentx - 16] = ch;
-                            currentx++;
-                            if ( currentx > 31 ) {
-                                currentx = 31; 
+                            maxx = (XSTART + sizeof( ssid ) - 1);
+                            if ( currentx < maxx ) {
+                                ssid[currentx - XSTART] = ch;
+                                currentx++;
+                            }
+                            if ( currentx > (maxx - 1) ) {
+                                currentx = maxx;
                             }
                             break;
                         }
                         case 4: {
-                            psk[currentx - 16] = ch;
-                            currentx++;
-                            if ( currentx > 31 ) {
-                                currentx = 31; 
+                            maxx = (XSTART + sizeof( psk ) - 1);
+                            if ( currentx < maxx ) {
+                                psk[currentx - XSTART] = ch;
+                                currentx++;
+                            }
+                            if ( currentx > (maxx - 1) ) {
+                                currentx = maxx;
                             }
                             break;
                         }
@@ -504,23 +525,32 @@ int main( int argc, char **argv ) {
 
             /** Draw the menu */
             int y = starty;
-            mvaddstr( y++, 2, "0. No-operation" );
-            mvaddstr( y++, 2, "1. Mount SD Card" );
-            mvaddstr( y++, 2, "2. Unmount SD Card" );
-            mvaddstr( y++, 2, "3. ls -laF SD Card" );
-            mvaddstr( y++, 2, "4. Stress Test SD Card" );
-            mvaddstr( y++, 2, "5. Test GPIO" );
-            mvaddstr( y++, 2, "6. Test USB" );
-            mvaddstr( y++, 2, "7. Test I2C" );
-            mvaddstr( y++, 2, "8. Delete Fuse config file" );
-            mvaddstr( y++, 2, "9. Configure WiFi" );
+            mvaddstr( y++, 2, "0.  No-operation" );
+            if ( useGPIO ) {
+                mvaddstr( y++, 2, "1.  Switch to USB Keyboard mode" );
+            } else {
+                mvaddstr( y++, 2, "1.  Switch to Spectrum Keyboard mode" );
+            }
+            mvaddstr( y++, 2, "2.  Mount SD Card" );
+            mvaddstr( y++, 2, "3.  Unmount SD Card" );
+            mvaddstr( y++, 2, "4.  ls -laF SD Card" );
+            mvaddstr( y++, 2, "5.  Stress Test SD Card" );
+            mvaddstr( y++, 2, "6.  Test GPIO" );
+            mvaddstr( y++, 2, "7.  Test USB" );
+            mvaddstr( y++, 2, "8.  Test I2C" );
+            mvaddstr( y++, 2, "9.  Delete Fuse config file" );
+            mvaddstr( y++, 2, "10. Configure WiFi" );
 
             mvaddch( menuIndex + starty, 0, '>' );
 
             /** Draw footer */
             sprintf( str, "Menu selection will be activated in %u seconds", stw );
 
-            mvaddstr( maxlines - 2, 0, "Press Fuse menu button to advance cursor" );
+            if ( useGPIO ) {
+                mvaddstr( maxlines - 2, 0, "Press Fuse menu button to advance cursor" );
+            } else {
+                mvaddstr( maxlines - 2, 0, "Press any key to advance cursor" );
+            }
             mvaddstr( maxlines - 1, 0, str );
         }
 
@@ -541,7 +571,7 @@ int main( int argc, char **argv ) {
 
             /** Advance the cursor */
             menuIndex++;
-            menuIndex %= 10;
+            menuIndex %= 11;
 
             needsRefresh = 1;
         } else {
@@ -558,6 +588,24 @@ int main( int argc, char **argv ) {
                         break;
                     }
                     case 1: {
+                        if ( useGPIO ) {
+                            mvaddstr( maxlines - 5, 0, ">>> Switch to keyboard mode" );
+                        } else {
+                            mvaddstr( maxlines - 5, 0, ">>> Switch to GPIO mode" );
+                        }
+                        PRESS_A_KEY( maxlines - 4, 0 )
+                        refresh();
+                        blockWait();
+                        clear();
+                        if ( useGPIO ) {
+                            useGPIO = 0;
+                        } else {
+                            useGPIO = 1;
+                        }
+                        clear();
+                        break;
+                    }
+                    case 2: {
                         mvaddstr( maxlines - 5, 0, ">>> Mount SD Card" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -570,7 +618,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 2: {
+                    case 3: {
                         mvaddstr( maxlines - 5, 0, ">>> Unmount SD Card" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -583,7 +631,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 3: {
+                    case 4: {
                         mvaddstr( maxlines - 5, 0, ">>> ls -laF SD Card" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -599,7 +647,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 4: {
+                    case 5: {
                         mvaddstr( maxlines - 5, 0, ">>> Stress SD Card" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -612,7 +660,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 5: {
+                    case 6: {
                         mvaddstr( maxlines - 5, 0, ">>> Test GPIO" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -621,7 +669,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 6: {
+                    case 7: {
                         mvaddstr( maxlines - 5, 0, ">>> Test USB" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -634,7 +682,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 7: {
+                    case 8: {
                         mvaddstr( maxlines - 5, 0, ">>> Test I2C" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -647,7 +695,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 8: {
+                    case 9: {
                         mvaddstr( maxlines - 5, 0, ">>> Delete Fuse config file" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
@@ -662,7 +710,7 @@ int main( int argc, char **argv ) {
                         blockWait();
                         break;
                     }
-                    case 9: {
+                    case 10: {
                         mvaddstr( maxlines - 5, 0, ">>> Configure WiFi" );
                         PRESS_A_KEY( maxlines - 4, 0 )
                         refresh();
